@@ -1,0 +1,5 @@
+# Ignore build errors log
+tmp/build-errors.log
+
+# Ignore main file in tmp directory
+tmp/main
