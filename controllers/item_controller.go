@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"gin-fleamarket/services"
 	"net/http"
 	"strconv"
+
+	"gin-fleamarket/services"
 
 	"github.com/gin-gonic/gin"
 )
