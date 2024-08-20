@@ -11,6 +11,8 @@ type IItemRepository interface {
 	FindAll() (*[]models.Item, error)
 	FindById(itemId uint) (*models.Item, error)
 	Create(newItem models.Item) (*models.Item, error)
+	Update(updatedItem models.Item) (*models.Item, error)
+	Delete(itemId uint) error
 }
 
 // 構造体を定義 構造体とは、フィールドの集まりを定義した型
@@ -42,4 +44,28 @@ func (r *ItemMemoryRepository) Create(newItem models.Item) (*models.Item, error)
 	newItem.ID = uint(len(r.items) + 1)
 	r.items = append(r.items, newItem)
 	return &newItem, nil
+}
+
+// 更新
+func (r *ItemMemoryRepository) Update(updatedItem models.Item) (*models.Item, error) {
+	for i, v := range r.items {
+		if v.ID == updatedItem.ID {
+			r.items[i] = updatedItem
+			return &r.items[i], nil
+		}
+	}
+	return nil, errors.New("unexpected error")
+}
+
+// 削除
+func (r *ItemMemoryRepository) Delete(itemId uint) error {
+	// i, v := range r.items でスライスのインデックスと要素を取得
+	for i, v := range r.items {
+		if v.ID == itemId {
+			// append()関数でスライスの要素を削除 ...演算子でスライスの要素を展開
+			r.items = append(r.items[:i], r.items[i+1:]...)
+			return nil
+		}
+	}
+	return errors.New("item not found")
 }
