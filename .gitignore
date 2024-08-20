@@ -2,4 +2,11 @@
 tmp/build-errors.log
 
 # Ignore main file in tmp directory
-tmp/main
+backend/docker/postgres/pgdata/
+docker/postgres/pgdata/postmaster.pid
+docker/postgres/pgdata/
+backend/docker/pgadmin/pgadmin4.db
+backend/docker/pgadmin/sessions/
+backend/tmp/main
+backend/tmp/build-errors.log
+.DS_Store

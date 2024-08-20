@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+  # frontend:
+  #   build:
+  #     context: ./frontend/
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./frontend:/app
+  #   ports:
+  #     - 3000:3000
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-init:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ginuser
+      POSTGRES_PASSWORD: ginpassword
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      POSTGRES_DB: fleamarket
+    hostname: postgres
+    restart: always
+    user: root
+
+volumes:
+  postgres-init:
+  postgres-data:
