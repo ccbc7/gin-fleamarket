@@ -16,5 +16,5 @@ RUN go mod download
 # 公開予定のコンテナのポートを明示
 EXPOSE 8080
 
-# Airを使用して自動的にビルドと実行を管理する(ホットリロード)
-CMD ["air"]
+# Air(ホットリロード)を実行, 標準出力と標準エラー出力をログファイルに出力
+CMD ["sh", "-c", "air 2>&1 | tee tmp/build-output.log"]
