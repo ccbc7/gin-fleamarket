@@ -7,3 +7,4 @@ backend/tmp/main
 backend/tmp/build-errors.log
 .DS_Store
 backend/tmp/build-output.log
+backend/.env

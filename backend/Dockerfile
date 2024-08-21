@@ -1,6 +1,12 @@
 # ベースイメージを指定
 FROM golang:latest
 
+# tsなどのコマンドを使うため
+RUN apt-get update && apt-get install -y moreutils
+
+# タイムゾーンを設定
+ENV TZ=Asia/Tokyo
+
 # コンテナ内の作業ディレクトリを設定
 WORKDIR /app
 
@@ -17,4 +23,4 @@ RUN go mod download
 EXPOSE 8080
 
 # Air(ホットリロード)を実行, 標準出力と標準エラー出力をログファイルに出力
-CMD ["sh", "-c", "air 2>&1 | tee tmp/build-output.log"]
+CMD ["sh", "-c", "air 2>&1 | ts '[%Y/%m/%d %H:%M:%S]' | tee tmp/build-output.log"]
