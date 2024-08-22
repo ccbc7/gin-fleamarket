@@ -1,0 +1,52 @@
+# [Air](https://github.com/cosmtrek/air) の設定ファイル (TOML形式)
+
+# 作業ディレクトリ
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# 単なるシェルコマンド。`make`を使用することもできます。
+cmd = "go build -gcflags \"all=-N -l\" -o tmp/main ."
+# `cmd`から生成されるバイナリファイル。
+bin = "tmp/main"
+# バイナリをカスタマイズ。
+full_bin = "dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./tmp/main"
+# これらのファイル拡張子を監視。
+include_ext = ["go", "tpl", "tmpl", "html"]
+# これらのファイル拡張子やディレクトリを無視。
+exclude_dir = ["assets", "tmp", "vendor", "frontend/node_modules"]
+# 監視するディレクトリを指定する場合。
+include_dir = []
+# 除外するファイル。
+exclude_file = []
+# 除外する特定の正規表現。
+exclude_regex = ["_test.go"]
+# 変更されていないファイルを除外。
+exclude_unchanged = true
+# ディレクトリのシンボリックリンクを追跡
+follow_symlink = true
+# このログファイルはtmp_dirに配置されます。
+log = "air.log"
+# ファイルの変更が頻繁すぎる場合、ビルドをトリガーする必要はありません。
+delay = 1000 # ミリ秒
+# ビルドエラーが発生したときに古いバイナリの実行を停止します。
+stop_on_error = true
+# プロセスを強制終了する前に割り込み信号を送信します（Windowsはこの機能をサポートしていません）
+send_interrupt = false
+# 割り込み信号を送信した後の遅延
+kill_delay = 500 # ミリ秒
+
+[log]
+# ログ時間を表示
+time = false
+
+[color]
+# 各部分の色をカスタマイズ。色が見つからない場合は、生のアプリログを使用します。
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+# 終了時にtmpディレクトリを削除
+clean_on_exit = true

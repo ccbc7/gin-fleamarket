@@ -13,6 +13,9 @@ WORKDIR /app
 # ホットリロードを実現するAirをインストール
 RUN go install github.com/air-verse/air@latest
 
+# delveをインストール
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
 # ローカルのソースコードをコンテナにコピー
 COPY . .
 
