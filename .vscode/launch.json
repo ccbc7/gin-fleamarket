@@ -20,19 +20,14 @@
     {
       "name": "delv",
       "type": "go",
-      // requestはデバッグの種類を指定する attachは既存のプロセスにアタッチする
-      "request": "attach",
-      // modeはデバッグのモードを指定する remoteはリモートデバッグを行う
-      "mode": "remote",
-      "remotePath": "/app",
+      "request": "attach", // attachは既存のプロセスに接続する
+      "mode": "remote", //デバッグのモードを指定する remoteはリモートデバッグを行う
+      "remotePath": "/app", // コンテナ内の作業ディレクトリ
       "port": 2345,
       "host": "localhost",
-      // cwdはデバッグ対象のプロジェクトのルートディレクトリを指定する
-      "cwd": "${workspaceFolder}/backend",
-      // showLogはデバッグログを表示するかどうかを指定する
-      "showLog": true,
-      // traceはデバッグログの詳細度を指定する verboseは最も詳細なログを出力する
-      "trace": "verbose"
+      "cwd": "${workspaceFolder}/backend", // ローカルの作業ディレクトリ
+      "showLog": true, //デバッグログを表示するかどうかを指定する
+      "trace": "verbose", // デバッグログの詳細度を指定する
     }
   ]
 }
