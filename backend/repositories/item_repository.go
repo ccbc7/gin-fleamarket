@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	"gin-fleamarket/models"
+
+	"gorm.io/gorm"
 )
 
 // インターフェースを定義
@@ -72,4 +74,40 @@ func (r *ItemMemoryRepository) Delete(itemId uint) error {
 
 /*
 * DBを使う場合のリポジトリの実装
-*/
+ */
+type ItemDBRepository struct {
+	db *gorm.DB
+}
+
+// 作成
+func (r *ItemDBRepository) Create(newItem models.Item) (*models.Item, error) {
+	result := r.db.Create(&newItem)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &newItem, nil
+}
+
+// Delete implements IItemRepository.
+func (i *ItemDBRepository) Delete(itemId uint) error {
+	panic("unimplemented")
+}
+
+// FindAll implements IItemRepository.
+func (i *ItemDBRepository) FindAll() (*[]models.Item, error) {
+	panic("unimplemented")
+}
+
+// FindById implements IItemRepository.
+func (i *ItemDBRepository) FindById(itemId uint) (*models.Item, error) {
+	panic("unimplemented")
+}
+
+// Update implements IItemRepository.
+func (i *ItemDBRepository) Update(updatedItem models.Item) (*models.Item, error) {
+	panic("unimplemented")
+}
+
+func NewItemRepository(db *gorm.DB) IItemRepository {
+	return &ItemDBRepository{db: db}
+}
