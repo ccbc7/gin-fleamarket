@@ -90,9 +90,18 @@ func (r *ItemDBRepository) Create(newItem models.Item) (*models.Item, error) {
 	return &newItem, nil
 }
 
-// Delete implements IItemRepository.
+// 削除
 func (r *ItemDBRepository) Delete(itemId uint) error {
-	panic("unimplemented")
+	deleteItem, err := r.FindById(itemId)
+	if err != nil {
+		return err
+	}
+
+	result := r.db.Delete(&deleteItem)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 // 全件取得
@@ -107,7 +116,6 @@ func (r *ItemDBRepository) FindAll() (*[]models.Item, error) {
 
 // IDで取得
 func (r *ItemDBRepository) FindById(itemId uint) (*models.Item, error) {
-	// varにする理由は、ポインタを渡すため, ゼロ値を渡すため
 	var item models.Item
 	// 第一引数に構造体のポインタ、第二引数にIDを指定
   result := r.db.First(&item, itemId)
@@ -120,9 +128,13 @@ func (r *ItemDBRepository) FindById(itemId uint) (*models.Item, error) {
 	return &item, nil
 }
 
-// Update implements IItemRepository.
-func (i *ItemDBRepository) Update(updatedItem models.Item) (*models.Item, error) {
-	panic("unimplemented")
+// 更新
+func (r *ItemDBRepository) Update(updatedItem models.Item) (*models.Item, error) {
+	result := r.db.Save(&updatedItem)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &updatedItem, nil
 }
 
 func NewItemRepository(db *gorm.DB) IItemRepository {
