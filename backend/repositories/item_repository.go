@@ -69,3 +69,7 @@ func (r *ItemMemoryRepository) Delete(itemId uint) error {
 	}
 	return errors.New("item not found")
 }
+
+/*
+* DBを使う場合のリポジトリの実装
+*/
