@@ -75,6 +75,8 @@ func (r *ItemMemoryRepository) Delete(itemId uint) error {
 /*
 * DBを使う場合のリポジトリの実装
  */
+
+// 構造体を定義
 type ItemDBRepository struct {
 	db *gorm.DB
 }
@@ -89,18 +91,33 @@ func (r *ItemDBRepository) Create(newItem models.Item) (*models.Item, error) {
 }
 
 // Delete implements IItemRepository.
-func (i *ItemDBRepository) Delete(itemId uint) error {
+func (r *ItemDBRepository) Delete(itemId uint) error {
 	panic("unimplemented")
 }
 
-// FindAll implements IItemRepository.
-func (i *ItemDBRepository) FindAll() (*[]models.Item, error) {
-	panic("unimplemented")
+// 全件取得
+func (r *ItemDBRepository) FindAll() (*[]models.Item, error) {
+	var items []models.Item
+	result := r.db.Find(&items)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &items, nil
 }
 
-// FindById implements IItemRepository.
-func (i *ItemDBRepository) FindById(itemId uint) (*models.Item, error) {
-	panic("unimplemented")
+// IDで取得
+func (r *ItemDBRepository) FindById(itemId uint) (*models.Item, error) {
+	// varにする理由は、ポインタを渡すため, ゼロ値を渡すため
+	var item models.Item
+	// 第一引数に構造体のポインタ、第二引数にIDを指定
+  result := r.db.First(&item, itemId)
+	if result.Error != nil {
+		if result.Error.Error() == "record not found" {
+			return nil, errors.New("item not found")
+		}
+		return nil, result.Error
+	}
+	return &item, nil
 }
 
 // Update implements IItemRepository.
