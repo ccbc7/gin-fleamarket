@@ -82,7 +82,7 @@ func CreateToken(userId uint, email string) (*string, error) {
 func (s *AuthService) GetUserFromToken(tokenString string) (*models.User, error) {
 	// トークンをパースして検証
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// 型アサーションで署名方法を確認
+		// 型アサーションで署名方法を確認, 型があっていない場合はエラーを返す(HS256以外の署名方法は受け付けない)
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}

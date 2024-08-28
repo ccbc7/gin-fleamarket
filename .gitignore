@@ -9,3 +9,4 @@ backend/tmp/build-errors.log
 backend/tmp/build-output.log
 backend/.env
 tmp/build-errors.log
+backend/.env.test

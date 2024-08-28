@@ -11,19 +11,10 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func main() {
-	infra.Initialize()
-	// modelsパッケージ内のItem構造体のスライスを作成
-	db := infra.SetupDB()
-	// items := []models.Item{
-	// 	{ID: 1, Name: "item1", Price: 100, Description: "This is item1", SoldOut: false},
-	// 	{ID: 2, Name: "item2", Price: 200, Description: "This is item2", SoldOut: false},
-	// 	{ID: 3, Name: "item3", Price: 300, Description: "This is item3", SoldOut: false},
-	// }
-
-	// itemRepository := repositories.NewItemMemoryRepository(items)
+func setupRouter(db *gorm.DB) *gin.Engine {
 	itemRepository := repositories.NewItemRepository(db)
 	itemService := services.NewItemService(itemRepository)
 	itemController := controllers.NewItemController(itemService)
@@ -54,5 +45,25 @@ func main() {
 	authRouter.POST("/signup", authController.SignUp)
 	authRouter.POST("/login", authController.Login)
 
+	return r
+}
+
+func main() {
+	// 初期化(環境変数の読み込み)
+	infra.Initialize()
+
+	// DB接続
+	db := infra.SetupDB()
+
+	// ルーターの設定 引数にDBを渡すことで、各レイヤー(サービス,リポジトリ,コントローラ)でDBを利用できる
+	r := setupRouter(db)
+
 	r.Run(":8080")
 }
+
+// itemRepository := repositories.NewItemMemoryRepository(items)
+// items := []models.Item{
+// 	{ID: 1, Name: "item1", Price: 100, Description: "This is item1", SoldOut: false},
+// 	{ID: 2, Name: "item2", Price: 200, Description: "This is item2", SoldOut: false},
+// 	{ID: 3, Name: "item3", Price: 300, Description: "This is item3", SoldOut: false},
+// }
