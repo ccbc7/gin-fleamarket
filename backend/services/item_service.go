@@ -9,10 +9,10 @@ import (
 // インターフェースを定義
 type IItemService interface {
 	FindAll() (*[]models.Item, error)
-	FindById(itemId uint) (*models.Item, error)
-	Create(createItemInput dto.CreateItemInput) (*models.Item, error)
-	Update(itemId uint, updateItemInput dto.UpdateItemInput) (*models.Item, error)
-	Delete(itemId uint) error
+	FindById(itemId uint, userId uint) (*models.Item, error)
+	Create(createItemInput dto.CreateItemInput, userId uint) (*models.Item, error)
+	Update(itemId uint, updateItemInput dto.UpdateItemInput, userId uint) (*models.Item, error)
+	Delete(itemId uint, userId uint) error
 }
 
 // 構造体を定義
@@ -31,25 +31,27 @@ func (s *ItemService) FindAll() (*[]models.Item, error) {
 }
 
 // IDで商品を取得
-func (s *ItemService) FindById(itemId uint) (*models.Item, error) {
-	return s.repository.FindById(itemId)
+func (s *ItemService) FindById(itemId uint, userId uint) (*models.Item, error) {
+	return s.repository.FindById(itemId, userId)
 }
 
 // 作成
-func (s *ItemService) Create(createItemInput dto.CreateItemInput) (*models.Item, error) {
+func (s *ItemService) Create(createItemInput dto.CreateItemInput, userId uint) (*models.Item, error) {
 	newItem := models.Item{
 		Name:        createItemInput.Name,
 		Price:       createItemInput.Price,
 		Description: createItemInput.Description,
 		SoldOut:     false,
+		UserID:      userId,
 	}
 	// リポジトリ層のCreateメソッドを呼び出し、作成処理を行う
 	return s.repository.Create(newItem)
 }
 
 // 更新
-func (s *ItemService) Update(itemId uint, updateItemInput dto.UpdateItemInput) (*models.Item, error) {
-	targetItem, err := s.FindById(itemId)
+func (s *ItemService) Update(itemId uint, updateItemInput dto.UpdateItemInput, userId uint) (*models.Item, error) {
+	// IDとユーザーIDで商品を取得,ユーザは自分の商品のみ更新できる
+	targetItem, err := s.FindById(itemId, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -72,6 +74,6 @@ func (s *ItemService) Update(itemId uint, updateItemInput dto.UpdateItemInput) (
 }
 
 // 削除
-func (s *ItemService) Delete(itemId uint) error {
-	return s.repository.Delete(itemId)
+func (s *ItemService) Delete(itemId uint, userId uint) error {
+	return s.repository.Delete(itemId, userId)
 }

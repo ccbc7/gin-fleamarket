@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"gin-fleamarket/dto"
+	"gin-fleamarket/models"
 
 	"gin-fleamarket/services"
 
@@ -37,8 +38,19 @@ func (c *itemController) FindAll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"data": items})
 }
 
-// リクエストパラメータからIDを取得し、サービスのFindById()メソッドを呼び出し、結果をJSON形式で返す
+// IDで商品を取得
 func (c *itemController) FindById(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	userId := user.(*models.User).ID
+
+
+
+
 	// strconv.ParseUint()文字列を整数に変換, 10進数, 64ビット
 	itemId, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
@@ -46,7 +58,7 @@ func (c *itemController) FindById(ctx *gin.Context) {
 		return
 	}
 
-	item, err := c.service.FindById(uint(itemId))
+	item, err := c.service.FindById(uint(itemId), userId)
 	if err != nil {
 		if err.Error() == "item not found" {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -59,13 +71,23 @@ func (c *itemController) FindById(ctx *gin.Context) {
 
 // 作成
 func (c *itemController) Create(ctx *gin.Context) {
+
+	// ユーザー情報を取得
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	userId := user.(*models.User).ID
+
 	var input dto.CreateItemInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	newItem, err := c.service.Create(input)
+	newItem, err := c.service.Create(input, userId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -76,19 +98,30 @@ func (c *itemController) Create(ctx *gin.Context) {
 
 // 更新
 func (c *itemController) Update(ctx *gin.Context) {
+	//ユーザーを取得
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	userId := user.(*models.User).ID
+
+
 	itemId, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
 		return
 	}
 
+	// UpdateItemInput構造体を定義
 	var input dto.UpdateItemInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	updatedItem, err := c.service.Update(uint(itemId), input)
+	updatedItem, err := c.service.Update(uint(itemId), input, userId)
 	if err != nil {
 		if err.Error() == "item not found" {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -102,13 +135,22 @@ func (c *itemController) Update(ctx *gin.Context) {
 
 // 削除
 func (c *itemController) Delete(ctx *gin.Context) {
+		user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	userId := user.(*models.User).ID
+
+	// idを取得
 	itemId, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
 		return
 	}
 
-	err = c.service.Delete(uint(itemId))
+	err = c.service.Delete(uint(itemId), userId)
 	if err != nil {
 		if err.Error() == "item not found" {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

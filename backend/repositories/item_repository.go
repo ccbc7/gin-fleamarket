@@ -11,10 +11,10 @@ import (
 // インターフェースを定義
 type IItemRepository interface {
 	FindAll() (*[]models.Item, error)
-	FindById(itemId uint) (*models.Item, error)
+	FindById(itemId uint, userId uint) (*models.Item, error)
 	Create(newItem models.Item) (*models.Item, error)
 	Update(updatedItem models.Item) (*models.Item, error)
-	Delete(itemId uint) error
+	Delete(itemId uint, userId uint) error
 }
 
 // 構造体を定義 構造体とは、フィールドの集まりを定義した型
@@ -33,7 +33,7 @@ func (r *ItemMemoryRepository) FindAll() (*[]models.Item, error) {
 }
 
 // 構造体のItemsフィールドからIDを検索して返す
-func (r *ItemMemoryRepository) FindById(itemId uint) (*models.Item, error) {
+func (r *ItemMemoryRepository) FindById(itemId uint, userId uint) (*models.Item, error) {
 	for _, v := range r.items {
 		if v.ID == itemId {
 			return &v, nil
@@ -60,7 +60,7 @@ func (r *ItemMemoryRepository) Update(updatedItem models.Item) (*models.Item, er
 }
 
 // 削除
-func (r *ItemMemoryRepository) Delete(itemId uint) error {
+func (r *ItemMemoryRepository) Delete(itemId uint, userId uint) error {
 	// i, v := range r.items でスライスのインデックスと要素を取得
 	for i, v := range r.items {
 		if v.ID == itemId {
@@ -91,8 +91,8 @@ func (r *ItemDBRepository) Create(newItem models.Item) (*models.Item, error) {
 }
 
 // 削除
-func (r *ItemDBRepository) Delete(itemId uint) error {
-	deleteItem, err := r.FindById(itemId)
+func (r *ItemDBRepository) Delete(itemId uint, userId uint) error {
+	deleteItem, err := r.FindById(itemId, userId)
 	if err != nil {
 		return err
 	}
@@ -115,10 +115,10 @@ func (r *ItemDBRepository) FindAll() (*[]models.Item, error) {
 }
 
 // IDで取得
-func (r *ItemDBRepository) FindById(itemId uint) (*models.Item, error) {
+func (r *ItemDBRepository) FindById(itemId uint, userId uint) (*models.Item, error) {
 	var item models.Item
 	// 第一引数に構造体のポインタ、第二引数にIDを指定
-  result := r.db.First(&item, itemId)
+	result := r.db.First(&item, "id = ? AND user_id = ?", itemId, userId)
 	if result.Error != nil {
 		if result.Error.Error() == "record not found" {
 			return nil, errors.New("item not found")
