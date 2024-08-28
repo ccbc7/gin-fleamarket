@@ -9,6 +9,7 @@ import (
 	"gin-fleamarket/repositories"
 	"gin-fleamarket/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,12 +32,20 @@ func main() {
 	authService := services.NewAuthService(authRepository)
 	authController := controllers.NewAuthController(authService)
 
+	// ルーターの作成
 	r := gin.Default()
+
+	// CORSの設定
+	r.Use(cors.Default())
+
+	// ルーティンググループの作成
 	itemRouter := r.Group("/items")
 	itemRouterWithAuth := r.Group("/items", middlewares.AuthMiddleware(authService))
 	authRouter := r.Group("/auth")
 
+	// ルーティングの設定
 	itemRouter.GET("", itemController.FindAll)
+
 	itemRouterWithAuth.GET("/:id", itemController.FindById)
 	itemRouterWithAuth.POST("", itemController.Create)
 	itemRouterWithAuth.PUT("/:id", itemController.Update)
@@ -44,5 +53,6 @@ func main() {
 
 	authRouter.POST("/signup", authController.SignUp)
 	authRouter.POST("/login", authController.Login)
+
 	r.Run(":8080")
 }
