@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes" // 追加
 	"encoding/json"
 	"fmt"
 	"log"
@@ -14,17 +15,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 
+	"gin-fleamarket/dto"
 	"gin-fleamarket/infra"
 	"gin-fleamarket/models"
+	"gin-fleamarket/services"
 )
 
 func TestMain(m *testing.M) {
-	if err := godotenv.Load("../.env.test"); err != nil {
-		log.Println("Error loading .env.test file:", err) // 変更
+	// テスト用の.envファイルを読み込む
+	if err := godotenv.Load(".env.test"); err != nil {
+		log.Println("Error loading .env.test file:", err)
 	}
 
+	// テスト用のデータベースをセットアップ
 	code := m.Run()
 
+	// テストが終わったらテスト用のデータベースを削除
 	os.Exit(code)
 }
 
@@ -59,11 +65,12 @@ func setup() *gin.Engine {
 	return router
 }
 
+// t *testing.T はテストの状態と結果を報告するためのオブジェクト
 func TestFindAll(t *testing.T) {
 	// テスト用のデータをセットアップ
 	router := setup()
 
-	//HTTPレスポンスを記録するオブジェクトを作成
+	// HTTPレスポンスを記録するオブジェクトを作成
 	w := httptest.NewRecorder()
 
 	// NewRequestを使ってリクエストを作成
@@ -75,13 +82,88 @@ func TestFindAll(t *testing.T) {
 	// resの型を定義しているだけで、中身は空のmap
 	var res map[string][]models.Item
 
-	// レスポンスのボディをJSON形式からGoのデータ構造に変換
+	// レスポンスのボディをJSON形式からresで定義した構造体に格納
 	json.Unmarshal(w.Body.Bytes(), &res)
 
-	// レスポンスのステータスコードが200であることを確認
+	// アサーションを使ってテストの結果を確認
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// レスポンスのボディに含まれるデータの数が3であることを確認
 	assert.Equal(t, 3, len(res["data"]))
 	fmt.Println(res)
+}
+
+func TestCreate(t *testing.T) {
+	router := setup()
+
+	// サービス層のCreateTokenメソッドを使ってトークンを作成
+	token, err := services.CreateToken(1, "test1@example.com")
+
+	// tはテストの状態と結果の報告用オブジェクト, nilはエラーがないことを示す, errは実際のエラー
+	assert.Equal(t, nil, err)
+
+	createItemInput := dto.CreateItemInput{
+		Name:        "テストアイテム4",
+		Price:       1000,
+		Description: "Createテスト",
+	}
+
+	// createItemInputをJSON形式に変換
+	reqBody, _ := json.Marshal(createItemInput)
+
+	// レコーダーを作成
+	w := httptest.NewRecorder()
+
+	// リクエストを作成
+	req, _ := http.NewRequest("POST", "/items", bytes.NewBuffer(reqBody))
+
+	// リクエストヘッダーにトークンをセット
+	req.Header.Set("Authorization", "Bearer "+*token)
+
+	fmt.Println(req.Header)
+
+	router.ServeHTTP(w, req)
+
+	// レスポンスのボディを格納する変数を定義
+	var res map[string]models.Item
+
+	// レスポンスのボディをJSON形式からresで定義した構造体に格納
+	json.Unmarshal(w.Body.Bytes(), &res)
+
+	// アサーションを使ってテストの結果を確認
+	assert.Equal(t, http.StatusCreated, w.Code)
+
+	assert.Equal(t, uint(4), res["data"].ID)
+}
+
+func TestCreateUnauthorized(t *testing.T) {
+	router := setup()
+
+	createItemInput := dto.CreateItemInput{
+		Name:        "テストアイテム4",
+		Price:       1000,
+		Description: "Createテスト",
+	}
+
+	// createItemInputをJSON形式に変換
+	reqBody, _ := json.Marshal(createItemInput)
+
+	// レコーダーを作成
+	w := httptest.NewRecorder()
+
+	// リクエストを作成
+	req, _ := http.NewRequest("POST", "/items", bytes.NewBuffer(reqBody))
+
+	fmt.Println(req.Header)
+
+	router.ServeHTTP(w, req)
+
+	// レスポンスのボディを格納する変数を定義
+	var res map[string]models.Item
+
+	// レスポンスのボディをJSON形式からresで定義した構造体に格納
+	json.Unmarshal(w.Body.Bytes(), &res)
+
+	// アサーションを使ってテストの結果を確認
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
